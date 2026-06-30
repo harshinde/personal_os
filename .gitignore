@@ -1,0 +1,11 @@
+# OS specific
+.DS_Store
+*.log
+
+# Large files
+*.pdf
+*.docx
+
+# Private data (optional)
+chats/private/
+notes/private/
