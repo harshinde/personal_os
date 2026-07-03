@@ -1,7 +1,9 @@
 # Personal OS
 
-Central hub for projects, LLM chats, notes, and knowledge.
+Central hub for projects, LLM chats, notes, tasks, and knowledge.
 
-## Structure
-
-See folder overview below.
+## Quick Start
+- Clone this repo
+- Customize CLAUDE.md / AGENTS.md
+- Create projects in `projects/` folder
+- Log LLM chats in `chats/`

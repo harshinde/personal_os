@@ -1,3 +1,5 @@
 # LLM Chats
 
-Organize conversations here.
+Store conversations with Grok, Claude, etc. here.
+
+Organize by date or project.
