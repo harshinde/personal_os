@@ -2,10 +2,20 @@
 .DS_Store
 *.log
 
-# Large files
+# Large files / tax docs
 *.pdf
 *.docx
+*.xlsx
+*.xls
+*.csv
 
 # Private data (optional)
 chats/private/
 notes/private/
+
+# Sensitive tax artifacts (keep structure, not contents)
+projects/it-returns/inputs/cpa-return/*
+!projects/it-returns/inputs/cpa-return/.gitkeep
+projects/it-returns/inputs/source-docs/*
+!projects/it-returns/inputs/source-docs/.gitkeep
+projects/it-returns/outputs/**/*.json
