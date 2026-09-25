@@ -1,0 +1,54 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title>The Cut — a history of film editing</title>
+<style>
+  @font-face { font-family: "Bebas Neue"; src: url("fonts/BebasNeue-Regular.ttf"); }
+  html, body { margin: 0; background: #111; }
+  canvas { display: block; width: 100vw; height: auto; max-height: 100vh; object-fit: contain; }
+  body.render canvas { width: 1920px; height: 1080px; }
+  #ui { position: fixed; left: 8px; bottom: 8px; color: #ddd; font: 12px monospace; }
+  body.render #ui { display: none; }
+</style>
+</head>
+<body>
+<canvas id="c" width="1920" height="1080"></canvas>
+<div id="ui">space: play/pause · ←/→: step · ?t=SECONDS to freeze</div>
+<script src="scene.js"></script>
+<script>
+  const params = new URLSearchParams(location.search);
+  const canvas = document.getElementById('c');
+  const ctx = canvas.getContext('2d');
+  const { DUR, drawFrame } = window.FilmHistory;
+  if (params.has('render')) document.body.classList.add('render');
+
+  window.READY = Promise.all([
+    document.fonts.load('40px "Bebas Neue"'),
+    document.fonts.load('600 20px "JetBrains Mono"'),
+  ]).then(() => document.fonts.ready);
+
+  window.renderFrame = (t) => drawFrame(ctx, t);
+
+  if (!params.has('render')) {
+    window.READY.then(() => {
+      let t = params.has('t') ? parseFloat(params.get('t')) : 0;
+      let playing = !params.has('t');
+      let last = performance.now();
+      addEventListener('keydown', (e) => {
+        if (e.code === 'Space') playing = !playing;
+        if (e.code === 'ArrowRight') t += 1 / 30;
+        if (e.code === 'ArrowLeft') t -= 1 / 30;
+      });
+      const tick = (now) => {
+        if (playing) t = (t + (now - last) / 1000) % DUR;
+        last = now;
+        drawFrame(ctx, t);
+        requestAnimationFrame(tick);
+      };
+      requestAnimationFrame(tick);
+    });
+  }
+</script>
+</body>
+</html>
