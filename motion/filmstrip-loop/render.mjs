@@ -19,14 +19,17 @@ const CHROME = process.env.CHROME_PATH
   ?? ['/usr/local/bin/google-chrome', '/usr/bin/google-chrome', '/usr/bin/chromium', '/usr/bin/chromium-browser',
       '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'].find(existsSync);
 
-const browser = await puppeteer.launch({
-  executablePath: CHROME,
-  headless: true,
-  args: ['--no-sandbox', '--disable-gpu-vsync', '--force-color-profile=srgb', '--hide-scrollbars'],
-});
-
+// One browser per worker: headless Chrome does not paint background tabs, so tabs sharing a
+// browser stall on screenshot.
+const browsers = [];
 async function openPage() {
-  const page = await browser.newPage();
+  const browser = await puppeteer.launch({
+    executablePath: CHROME,
+    headless: true,
+    args: ['--no-sandbox', '--disable-gpu-vsync', '--force-color-profile=srgb', '--hide-scrollbars'],
+  });
+  browsers.push(browser);
+  const [page] = await browser.pages();
   await page.setViewport({ width: 1920, height: 1080, deviceScaleFactor: 1 });
   await page.goto(pathToFileURL(resolve(here, 'index.html')).href + '?render=1');
   await page.evaluate(() => window.READY);
@@ -46,7 +49,7 @@ if (STILLS) {
     writeFileSync(file, await grab(page, t));
     console.log('still', i + 1, t, file);
   }
-  await browser.close();
+  await Promise.all(browsers.map((b) => b.close()));
   process.exit(0);
 }
 
@@ -91,5 +94,5 @@ await Promise.all(pages.map(async (page) => {
 await flushing;
 ff.stdin.end();
 await ffDone;
-await browser.close();
+await Promise.all(browsers.map((b) => b.close()));
 console.log(`\nwrote ${OUT} (${N} frames @ ${FPS} fps) in ${((Date.now() - t0) / 1000).toFixed(1)} s`);
